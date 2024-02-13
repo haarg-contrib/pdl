@@ -193,6 +193,7 @@ void prtz(int n,double zr[], double zi[])
 char *cpoly(double opr[], double opi[], int degree,
 	   double zeror[], double zeroi[])
 {
+fprintf(stderr, "ENTRY deg=%d\n", degree);
   /* Finds the zeros of a complex polynomial.
 
      opr, opi - double precision vectors of real and imaginary parts
@@ -258,6 +259,7 @@ char *cpoly(double opr[], double opi[], int degree,
   }
 
   while (!failreason) {
+fprintf(stderr, " NOFAIL yet nn=%d\n", nn);
 
     /* Start the algorithm for one zero */
     if (nn < 3) {
@@ -277,12 +279,14 @@ char *cpoly(double opr[], double opi[], int degree,
        of shifts */
     failreason = "found fewer than degree zeros";
     for(cnt1=1;failreason && (cnt1<=2);cnt1++) {
+fprintf(stderr, " OUTER cnt1=%d tc=%f%+f\n", cnt1, creal(tc), cimag(tc));
 
       /* First stage calculation, no shift */
       tc = noshft(5,nn,tc,hc,pc);
 
       /* Inner loop to select a shift. */
       for (cnt2=1;failreason && (cnt2<10);cnt2++) {
+fprintf(stderr, "  INNER cnt2=%d tc=%f%+f\n", cnt2, creal(tc), cimag(tc));
 	/* Shift is chosen with modulus bnd and amplitude rotated by
 	   94 degrees from the previous shift */
 	xxx = COSR*xx-SINR*yy;
@@ -318,6 +322,14 @@ returnlab:
   if (pc) free(pc);
   /* The zerofinder has failed on two major passes
      Return empty handed */
+if (failreason) {
+  fprintf(stderr, "FAIL data (got to %d):\n", nn);
+  int i;
+  for (i=0; i<degree+1; i++) {
+    fprintf(stderr, "  %20f%+20fi\n", opr[i], opi[i]);
+  }
+  fflush(stderr);
+}
   return failreason;
 }
 
