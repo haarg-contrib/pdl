@@ -247,7 +247,7 @@ fprintf(stderr, "ENTRY deg=%d\n", degree);
   /* Make a copy of the coefficients */
   for (i=0;i<nn;i++) {
     pc[i] = opr[i] + I*opi[i];
-    shc[i] = cmod(pc[i]) + I*cimag(shc[i]);
+    shc[i] = cmod(pc[i]);
   }
 
   /* Scale the polynomial */
