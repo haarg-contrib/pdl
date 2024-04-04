@@ -17,11 +17,30 @@ jobs:
         with:
           target-notifications: true
 
+  ci-32bit:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    needs: notify
+    strategy:
+      fail-fast: false
+      matrix:
+        container: ['i386/perl:5.38']
+    steps:
+      - uses: actions/checkout@v2
+      - name: 32-bit CI
+        env:
+          HARNESS_OPTIONS: j4
+        run: |
+          docker run --rm -v "$(pwd):/pdl" -w /pdl ${{ matrix.container }} \
+            sh -c 'uname -a; perl -V; \
+              (cpanm -n ExtUtils::MakeMaker Devel::CheckLib File::Which && cpanm -n --installdeps .) || ( cat ~/.cpanm/build.log && false ) && \
+              perl Makefile.PL && make coretest && make test'
+
   build-status:
     runs-on: ubuntu-latest
     continue-on-error: true
     if: ${{ always() }}
-    needs: []
+    needs: [ 'ci-32bit' ]
     steps:
       - uses: PDLPorters/devops/github-actions/irc-notifications@master
         with:
